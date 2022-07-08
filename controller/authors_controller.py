@@ -1,14 +1,20 @@
-from fastapi import APIRouter
-from typing import List
+from fastapi import APIRouter, Header, Body, Request
+from typing import List, Union
 from database.database import BaseDAO
 from model.authors_model import Author
+from database.security import verify_password, create_token, get_user, get_user_admin
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
 databaseDAO = BaseDAO()
+limiter = Limiter(key_func=get_remote_address, default_limits=["1/minute"])
 
 
 @router.get("/list-authors", response_model=List[Author])
-async def list_authors():
+@limiter.limit("5/minute")
+async def list_authors(request: Request, token: Union[str, None] = Header(default=None)):
+    get_user(token)
     author = None
     list_author = []
     records = (databaseDAO.select_value('SELECT * FROM bancoproj.authors'))
@@ -17,19 +23,26 @@ async def list_authors():
         list_author.append(author)
     return list_author
 
-@router.post("/new-user")
-async def add_user(new_user: User):
-    record = (new_user.id, new_user.hash_password, new_user.type, new_user.email, new_user.username)
-    user = databaseDAO.create_value('''INSERT INTO bancoproj.users(id, hash_password, type, email, username) VALUES (%s, %s, %s, %s, %s)''',record)
+
+@router.post("/new-author")
+@limiter.limit("5/minute")
+async def add_author(request: Request, new_author: Author, token: str = Header(default=None)):
+    get_user_admin(token)
+    record = (new_author.hash_password, new_author.type, new_author.email, new_author.username)
+    user = databaseDAO.create_value('''INSERT INTO bancoproj.users(hash_password, type, email, username) VALUES (%s, %s, %s, %s)''',record)
     if user == 1:
-        return "Registro inserido com Sucesso!!"
+        return "Author inserido com Sucesso!!"
     else:
         return "Falha na inserção"
 
-@router.delete("/delete-user")
-async def delete_user(id: int):
-    records = databaseDAO.delete_value('DELETE FROM bancoproj.users WHERE id = %s', id)
-    if records == 1:
-        return "Registro deletado com Sucesso!!"
+
+@router.patch("/update-author")
+@limiter.limit("5/minute")
+async def update_author(request: Request, token: str = Header(default=None), update_user_dto: Author = Body(default=None)):
+    get_user_admin(token)
+    user = databaseDAO.patch_value(
+        (f"UPDATE bancoproj.users SET hash_password = '{update_user_dto.hash_password}', type = '{update_user_dto.type}', email = '{update_user_dto.email}', username = '{update_user_dto.username}' WHERE id = {id}"))
+    if user == 1:
+        return "Registro atualizado com Sucesso!!"
     else:
-        return "Falha na deleção"
+        return "Falha na atualização"
