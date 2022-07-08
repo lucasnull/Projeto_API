@@ -1,13 +1,18 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Body
 from typing import List, Union
 from database.database import BaseDAO
 from database.security import verify_password, create_token, get_user
 from model.users_model import User
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
 databaseDAO = BaseDAO()
+limiter = Limiter(key_func=get_remote_address, default_limits=["1/minute"])
+
 
 @router.get("/list-users", response_model=List[User])
+@limiter.limit("5/minute")
 async def list_users(token: Union[str, None] = Header(default=None)):
     get_user(token)
     user = None
@@ -52,3 +57,13 @@ async def login(username: str, password: str):
     return {
         "token": create_token(list)
     }
+
+@router.patch("/update-user")
+async def update_user(id: int, token: str = Header(default=None), update_user_dto: User = Body(default=None)):
+    get_user(token)
+    user = databaseDAO.patch_value(
+        (f"UPDATE bancoproj.users SET hash_password = '{update_user_dto.hash_password}', type = '{update_user_dto.type}', email = '{update_user_dto.email}', username = '{update_user_dto.username}' WHERE id = {id}"))
+    if user == 1:
+        return "Registro atualizado com Sucesso!!"
+    else:
+        return "Falha na atualização"

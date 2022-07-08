@@ -40,3 +40,11 @@ class BaseDAO():
         cursor.execute(sql, (id,))
         db_execute.commit()
         return cursor.rowcount
+
+    @staticmethod
+    def patch_value(sql):
+        db_execute = BaseDAO.connection_db()
+        cursor = db_execute.cursor()
+        cursor.execute(sql)
+        db_execute.commit()
+        return cursor.rowcount

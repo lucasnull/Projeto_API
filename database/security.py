@@ -6,7 +6,6 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from jose import jwt
 from database.database import BaseDAO
-import json
 
 databaseDAO = BaseDAO()
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
