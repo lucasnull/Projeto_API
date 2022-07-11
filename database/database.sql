@@ -19,7 +19,7 @@ CREATE UNIQUE INDEX users_email_uindex
 
 CREATE TABLE bancoproj.authors
 (
-    author_id      INT          NOT NULL,
+    author_id      SERIAL          NOT NULL,
     name    VARCHAR(100) NOT NULL,
     picture INT          NOT NULL
 );
@@ -33,12 +33,13 @@ ALTER TABLE bancoproj.authors
 
 CREATE TABLE bancoproj.papers
 (
-    paper_id              INT          NOT NULL,
+    paper_id              SERIAL          NOT NULL,
     category        VARCHAR(100) NOT NULL,
     title           VARCHAR(100) NOT NULL,
     summary         VARCHAR(100) NOT NULL,
     first_paragraph VARCHAR(255) NOT NULL,
-    body            VARCHAR NOT NULL
+    body            VARCHAR NOT NULL,
+    authors_id       INT NOT NULL
 );
 
 CREATE UNIQUE INDEX papers_id_uindex
@@ -47,3 +48,8 @@ CREATE UNIQUE INDEX papers_id_uindex
 ALTER TABLE bancoproj.papers
     ADD CONSTRAINT papers_pk
         PRIMARY KEY (paper_id);
+
+ALTER TABLE bancoproj.papers
+    ADD CONSTRAINT fk_author
+        FOREIGN KEY (authors_id)
+            REFERENCES bancoproj.authors (author_id) ;

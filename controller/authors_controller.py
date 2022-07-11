@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header, Body, Request
 from typing import List, Union
 from database.database import BaseDAO
 from model.authors_model import Author
-from database.security import verify_password, create_token, get_user, get_user_admin
+from database.security import get_user, get_user_admin
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -19,7 +19,7 @@ async def list_authors(request: Request, token: Union[str, None] = Header(defaul
     list_author = []
     records = (databaseDAO.select_value('SELECT * FROM bancoproj.authors'))
     for row in records:
-        author = Author(id=row[0], hash_password=row[1], type=row[2], email=row[3], username=row[4])
+        author = Author(author_id=row[0], name=row[1], picture=row[2])
         list_author.append(author)
     return list_author
 
@@ -28,8 +28,8 @@ async def list_authors(request: Request, token: Union[str, None] = Header(defaul
 @limiter.limit("5/minute")
 async def add_author(request: Request, new_author: Author, token: str = Header(default=None)):
     get_user_admin(token)
-    record = (new_author.hash_password, new_author.type, new_author.email, new_author.username)
-    user = databaseDAO.create_value('''INSERT INTO bancoproj.users(hash_password, type, email, username) VALUES (%s, %s, %s, %s)''',record)
+    record = (new_author.name, new_author.picture)
+    user = databaseDAO.create_value('''INSERT INTO bancoproj.authors(name, picture) VALUES (%s, %s)''',record)
     if user == 1:
         return "Author inserido com Sucesso!!"
     else:
@@ -38,10 +38,10 @@ async def add_author(request: Request, new_author: Author, token: str = Header(d
 
 @router.patch("/update-author")
 @limiter.limit("5/minute")
-async def update_author(request: Request, token: str = Header(default=None), update_user_dto: Author = Body(default=None)):
+async def update_author(request: Request, id: int, token: str = Header(default=None), update_author_dto: Author = Body(default=None)):
     get_user_admin(token)
     user = databaseDAO.patch_value(
-        (f"UPDATE bancoproj.users SET hash_password = '{update_user_dto.hash_password}', type = '{update_user_dto.type}', email = '{update_user_dto.email}', username = '{update_user_dto.username}' WHERE id = {id}"))
+        (f"UPDATE bancoproj.authors SET name = '{update_author_dto.name}', picture = '{update_author_dto.picture}' WHERE author_id = {id}"))
     if user == 1:
         return "Registro atualizado com Sucesso!!"
     else:
