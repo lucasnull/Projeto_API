@@ -1,7 +1,7 @@
 FROM python:3.8.10
 
 COPY /API /proj001/API
-COPY API/requirements.txt /API
+COPY requirements.txt /proj001
 
 WORKDIR proj001
 
