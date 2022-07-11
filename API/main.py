@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, APIRouter
-from controller import users_controller, authors_controller, papers_controller
+from API.controller import users_controller, authors_controller, papers_controller
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded

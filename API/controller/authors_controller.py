@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Header, Body, Request
 from typing import List, Union
-from database.database import BaseDAO
-from model.authors_model import Author
-from database.security import get_user, get_user_admin
+from API.database.database import BaseDAO
+from API.model.authors_model import Author
+from API.database.security import get_user, get_user_admin
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 

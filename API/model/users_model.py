@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator
 import re
-from database.security import get_password_hash
+from API.database.security import get_password_hash
 
 
 class User(BaseModel):

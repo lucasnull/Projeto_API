@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from jose import jwt
-from database.database import BaseDAO
+from API.database.database import BaseDAO
 
 databaseDAO = BaseDAO()
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")

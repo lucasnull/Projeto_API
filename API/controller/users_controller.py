@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Header, Body, Request
 from typing import List, Union
-from database.database import BaseDAO
-from database.security import verify_password, create_token, get_user, get_user_admin
-from model.users_model import User
+from API.database.database import BaseDAO
+from API.database.security import verify_password, create_token, get_user, get_user_admin
+from API.model.users_model import User
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
